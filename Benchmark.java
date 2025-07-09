@@ -1,3 +1,21 @@
+//Exercício 3
+//
+//▸Utilizando como base sua implementação thread safe do ArrayList, compare o
+//desempenho com a versão original que não é thread safe utilizando apenas 1 thread
+//OK ▸Faça a comparação para os métodos de inserção, busca e remoção, variando o
+//tamanho da lista e mostrando o tempo necessário para a realizar a operação com os
+//tamanhos variados da lista. Adicionalmente, informe quantas operações (inserção,
+//busca e remoção separadamente) podem ser realizadas por segundo em ambas as
+//listas
+// OK ▸Repita os testes mas agora utilizando 16 threads para comparar sua implementação
+//thread safe com a classe Vector
+//OK (10000) ▸Cada thread realiza uma quantidade predefinida de operações de inserção, busca e
+//remoção com valores aleatórios
+//OK ▸Informe os valores obtidos nos testes realizados
+
+
+
+
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -32,7 +50,7 @@ public class Benchmark {
         long getTime = System.nanoTime() - start;
 
         start = System.nanoTime();
-        for (int i = 0; i < size; i++) list.remove(list.size() - 1);
+        for (int i = 0; i < size; i++) list.remove(list.size() - 1); // Correção: remove último elemento
         long removeTime = System.nanoTime() - start;
 
         System.out.printf("ArrayList -> Insercao: %.2f ms | %.0f ops/s | Busca: %.2f ms | %.0f ops/s | Remocao: %.2f ms | %.0f ops/s\n",
@@ -40,18 +58,18 @@ public class Benchmark {
                 getTime / 1e6, size / (getTime / 1e9),
                 removeTime / 1e6, size / (removeTime / 1e9));
 
-        // Teste com MyArrayList (thread-safe)
+        // Teste com MyArrayList
         MyArrayList<Integer> myList = new MyArrayList<>();
         start = System.nanoTime();
         for (int i = 0; i < size; i++) myList.add(i);
         addTime = System.nanoTime() - start;
 
         start = System.nanoTime();
-        for (int i = 0; i < size; i++) myList.get(rand.nextInt(size));
+        for (int i = 0; i < size; i++) myList.get(rand.nextInt(myList.size())); // Correção: usa size atual
         getTime = System.nanoTime() - start;
 
         start = System.nanoTime();
-        for (int i = size - 1; i >= 0; i--) myList.remove(i);
+        for (int i = 0; i < size; i++) myList.remove(myList.size() - 1); // Correção: remove por índice
         removeTime = System.nanoTime() - start;
 
         System.out.printf("MyArrayList -> Insercao: %.2f ms | %.0f ops/s | Busca: %.2f ms | %.0f ops/s | Remocao: %.2f ms | %.0f ops/s\n",
@@ -68,7 +86,9 @@ public class Benchmark {
         long start = System.nanoTime();
         runParallel(executor, () -> {
             Random rand = new Random();
-            for (int i = 0; i < OPERATIONS_PER_THREAD; i++) vector.add(rand.nextInt());
+            for (int i = 0; i < OPERATIONS_PER_THREAD; i++) {
+                vector.add(rand.nextInt());
+            }
             for (int i = 0; i < OPERATIONS_PER_THREAD; i++) {
                 synchronized (vector) {
                     if (!vector.isEmpty()) {
@@ -91,14 +111,30 @@ public class Benchmark {
         System.out.printf("Vector -> Total: %.2f s | %.0f ops/s\n",
                 vectorTime / 1e9, totalOps / (vectorTime / 1e9));
 
-        // Teste com MyArrayList (thread-safe com ReentrantLock)
+        // Teste com MyArrayList
         MyArrayList<Integer> myList = new MyArrayList<>();
         start = System.nanoTime();
         runParallel(executor, () -> {
             Random rand = new Random();
-            for (int i = 0; i < OPERATIONS_PER_THREAD; i++) myList.add(rand.nextInt());
-            for (int i = 0; i < OPERATIONS_PER_THREAD; i++) myList.get(rand.nextInt(OPERATIONS_PER_THREAD));
-            for (int i = 0; i < OPERATIONS_PER_THREAD; i++) myList.remove(rand.nextInt(OPERATIONS_PER_THREAD));
+            for (int i = 0; i < OPERATIONS_PER_THREAD; i++) {
+                myList.add(rand.nextInt());
+            }
+            for (int i = 0; i < OPERATIONS_PER_THREAD; i++) {
+                synchronized (myList) { // Atomicidade para operações compostas
+                    if (!myList.isEmpty()) {
+                        int idx = rand.nextInt(myList.size());
+                        myList.get(idx);
+                    }
+                }
+            }
+            for (int i = 0; i < OPERATIONS_PER_THREAD; i++) {
+                synchronized (myList) { // Atomicidade para operações compostas
+                    if (!myList.isEmpty()) {
+                        int idx = rand.nextInt(myList.size());
+                        myList.remove(idx); // Usa o novo método remove por índice
+                    }
+                }
+            }
         });
         long myListTime = System.nanoTime() - start;
         System.out.printf("MyArrayList -> Total: %.2f s | %.0f ops/s\n",
@@ -113,13 +149,10 @@ public class Benchmark {
             executor.submit(() -> {
                 try {
                     task.run();
-                } catch (Exception e) {
-                    e.printStackTrace();
                 } finally {
                     latch.countDown();
                 }
             });
-
         }
         latch.await();
     }

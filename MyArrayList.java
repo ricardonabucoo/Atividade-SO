@@ -96,6 +96,15 @@ public class MyArrayList<T> {
         }
     }
 
+    /////adicionei isso para ficar mais justo com a remoção em O(1)
+    public T remove(int index) {
+        lock.lock();
+        try {
+            return arrayList.remove(index);
+        } finally {
+            lock.unlock();
+        }
+    }
 }
 
 /* O seu desafio é implementar um ArrayList que seja thread safe. Lembre-se que as
