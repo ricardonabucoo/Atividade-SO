@@ -25,7 +25,7 @@ public class Teste {
     private static final int OPS_POR_THREAD = 10_000;
 
     public static void main(String[] args) throws InterruptedException {
-        System.out.println("=== BENCHMARK: ArrayList vs MyArrayList vs Vector ===\n");
+
 
         // Testes com 1 thread
         System.out.println("TESTES SEQUENCIAIS (1 thread):");
@@ -150,20 +150,20 @@ public class Teste {
 
         // Buscas
         for (int i = 0; i < OPS_POR_THREAD; i++) {
-            synchronized (myList) {
+
                 if (!myList.isEmpty()) {
                     myList.get(rand.nextInt(myList.size()));
                 }
-            }
+
         }
 
         // Remoções
         for (int i = 0; i < OPS_POR_THREAD; i++) {
-            synchronized (myList) {
+
                 if (!myList.isEmpty()) {
                     myList.remove(rand.nextInt(myList.size()));
                 }
-            }
+
         }
     }
 

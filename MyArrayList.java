@@ -1,110 +1,125 @@
 
 import java.util.ArrayList;
+import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class MyArrayList<T> {
     private final ArrayList<T> arrayList;
-    private final ReentrantLock lock;
+    private final ReentrantReadWriteLock rwLock;
+    private final Lock readLock;
+    private final Lock writeLock;
 
 
     public MyArrayList() {
         this.arrayList = new ArrayList<>();
-        this.lock = new ReentrantLock(true);
+        rwLock = new ReentrantReadWriteLock(true);
+        readLock = rwLock.readLock();
+        writeLock = rwLock.writeLock();
     }
 
     public void add(T element) {
-        lock.lock();
+        writeLock.lock();
         try {
             arrayList.add(element);
         } finally {
-            lock.unlock();
+            writeLock.unlock();
         }
     }
 
     public void remove(T element) {
-        lock.lock();
+        writeLock.lock();
         try {
             arrayList.remove(element);
         } finally {
-            lock.unlock();
+            writeLock.unlock();
         }
     }
 
     public T get(int index) {
-        lock.lock();
+        readLock.lock();
         try {
-            return arrayList.get(index);
+            try {
+                return arrayList.get(index);
+            } catch (IndexOutOfBoundsException e) {
+                return null;
+            }
         } finally {
-            lock.unlock();
+            readLock.unlock();
         }
     }
 
     public void printIndexAndAll(int index) {
-        lock.lock();
+        readLock.lock();
         try {
             System.out.println("Horse " + (index+1) + " finished");
             for (T element : arrayList) 
                 System.out.print(element + " ");
             System.out.println();
         } finally {
-            lock.unlock();
+            readLock.unlock();
         }
     }   
 
     public void set(int index, T element) {
-        lock.lock();
+        writeLock.lock();
         try {
             arrayList.set(index, element);
         } finally {
-            lock.unlock();
+            writeLock.unlock();
         }
     }
 
     public int size() {
-        lock.lock();
+        readLock.lock();
         try {
             return arrayList.size();
         } finally {
-            lock.unlock();
+            readLock.unlock();
         }
     }
 
     public boolean contains(T element) {
-        lock.lock();
+        readLock.lock();
         try {
             return arrayList.contains(element);
         } finally {
-            lock.unlock();
+            readLock.unlock();
         }
     }
 
     public void clear() {
-        lock.lock();
+        writeLock.lock();
         try {
             arrayList.clear();
         } finally {
-            lock.unlock();
+            writeLock.unlock();
         }
     }
 
     public boolean isEmpty() {
-        lock.lock();
+        readLock.lock();
         try {
             return arrayList.isEmpty();
         } finally {
-            lock.unlock();
+            readLock.unlock();
         }
     }
 
     /////adicionei isso para ficar mais justo com a remoção em O(1)
     public T remove(int index) {
-        lock.lock();
+        writeLock.lock();
         try {
-            return arrayList.remove(index);
+            try {
+                return arrayList.remove(index);
+            } catch (IndexOutOfBoundsException e) {
+                return null;
+            }
         } finally {
-            lock.unlock();
+            writeLock.unlock();
         }
     }
+
 }
 
 /* O seu desafio é implementar um ArrayList que seja thread safe. Lembre-se que as
