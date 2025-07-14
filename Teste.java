@@ -115,7 +115,7 @@ public class Teste {
 
     private static void executarOperacoesVector(Vector<Integer> vector) {
         Random rand = new Random();
-
+        Integer TAMANHO = 10000;
         // Inserções
         for (int i = 0; i < OPS_POR_THREAD; i++) {
             vector.add(rand.nextInt(1000));
@@ -123,26 +123,24 @@ public class Teste {
 
         // Buscas
         for (int i = 0; i < OPS_POR_THREAD; i++) {
-            synchronized (vector) {
-                if (!vector.isEmpty()) {
-                    vector.get(rand.nextInt(vector.size()));
-                }
-            }
+            vector.get(rand.nextInt(TAMANHO));
         }
 
         // Remoções
+
         for (int i = 0; i < OPS_POR_THREAD; i++) {
-            synchronized (vector) {
-                if (!vector.isEmpty()) {
-                    vector.remove(rand.nextInt(vector.size()));
-                }
+            try {
+                vector.remove(rand.nextInt(TAMANHO));
+            } catch(Exception e) {
+                continue;
             }
+
         }
     }
 
     private static void executarOperacoesMyList(MyArrayList<Integer> myList) {
         Random rand = new Random();
-
+        Integer TAMANHO = 10000;
         // Inserções
         for (int i = 0; i < OPS_POR_THREAD; i++) {
             myList.add(rand.nextInt(1));
@@ -150,19 +148,12 @@ public class Teste {
 
         // Buscas
         for (int i = 0; i < OPS_POR_THREAD; i++) {
-
-                if (!myList.isEmpty()) {
-                    myList.get(rand.nextInt(myList.size()));
-                }
-
+            myList.get(rand.nextInt(TAMANHO));
         }
 
         // Remoções
         for (int i = 0; i < OPS_POR_THREAD; i++) {
-
-                if (!myList.isEmpty()) {
-                    myList.remove(rand.nextInt(myList.size()));
-                }
+            myList.remove(rand.nextInt(TAMANHO));
 
         }
     }

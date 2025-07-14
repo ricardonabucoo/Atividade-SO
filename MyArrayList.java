@@ -1,7 +1,11 @@
+/* O seu desafio é implementar um ArrayList que seja thread safe. Lembre-se que as
+operações de consulta não causam condição de corrida umas com as outras,
+entretanto, as inserções e remoções causam condição de corrida entre elas.
+ */
+
 
 import java.util.ArrayList;
 import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class MyArrayList<T> {
@@ -12,7 +16,7 @@ public class MyArrayList<T> {
 
 
     public MyArrayList() {
-        this.arrayList = new ArrayList<>();
+        arrayList = new ArrayList<>();
         rwLock = new ReentrantReadWriteLock(true);
         readLock = rwLock.readLock();
         writeLock = rwLock.writeLock();
@@ -122,7 +126,3 @@ public class MyArrayList<T> {
 
 }
 
-/* O seu desafio é implementar um ArrayList que seja thread safe. Lembre-se que as
-operações de consulta não causam condição de corrida umas com as outras,
-entretanto, as inserções e remoções causam condição de corrida entre elas.
- */
